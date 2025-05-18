@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Glass Bridge Odds Simulator</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 700px;
+      margin: 40px auto;
+      text-align: center;
+      line-height: 1.6;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      margin-top: 20px;
+      cursor: pointer;
+    }
+    .result {
+      margin-top: 20px;
+      font-weight: bold;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🪟 Squid Game Glass Bridge Simulator</h1>
+  <p>
+    Click below to get your player number (1–16) and see if you’d survive the 18‑tile bridge.
+  </p>
+  <button onclick="simulate()">Draw & Simulate</button>
+  <div id="output" class="result"></div>
+
+  <script>
+    function simulate() {
+      const totalTiles = 18;
+      // 1. Assign a random player number 1–16
+      const playerNumber = Math.floor(Math.random() * 16) + 1;
+      const playersAhead = playerNumber - 1;
+
+      // 2. Simulate how many safe tiles have been revealed by players ahead
+      let safeTiles = 0;
+      for (let i = 0; i < playersAhead; i++) {
+        // 30% chance they guess two safe tiles in a row, otherwise just one
+        safeTiles += (Math.random() < 0.3 ? 2 : 1);
+      }
+      // You cannot reveal more tiles than exist
+      safeTiles = Math.min(safeTiles, totalTiles);
+
+      // 3. Compute how many guesses *you* need
+      const guessesRequired = Math.max(0, totalTiles - safeTiles);
+
+      // 4. Simulate your crossing (each tile is 50/50)
+      let survived = true;
+      for (let i = 0; i < guessesRequired; i++) {
+        if (Math.random() >= 0.5) {
+          survived = false;
+          break;
+        }
+      }
+
+      // 5. Theoretical odds: (0.5)^guessesRequired
+      const odds = Math.pow(0.5, guessesRequired);
+      const oddsPct = (odds * 100).toFixed(4) + '%';
+
+      // 6. Display results
+      const output = document.getElementById('output');
+      output.textContent = 
+        `You are player #${playerNumber} (so ${playersAhead} before you).\n` +
+        `Tiles already revealed: ${safeTiles} of ${totalTiles}.\n` +
+        `You must guess ${guessesRequired} tile${guessesRequired!==1?'s':''}.\n` +
+        `Simulated outcome: You ${survived ? 'SURVIVED 🎉' : 'fell ❌'}.\n` +
+        `Theoretical chance of surviving: ${oddsPct} (1 in ${survived && guessesRequired>0? (1/odds).toFixed(0) : '—'})`;
+    }
+  </script>
+
+</body>
+</html>
